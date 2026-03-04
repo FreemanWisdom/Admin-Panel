@@ -89,7 +89,7 @@ Authentication is mocked on the frontend:
 - Missing token redirects user to `/login`
 - Login page saves a mock token and redirects to `/dashboard`
 
-## Extra Buyer Documentation
+## Extra Documentation
 
 A short HTML install guide is included here:
 
