@@ -1,7 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { render, screen } from "@testing-library/react";
 
-import { DataTable } from "@/components/table/data-table";
+import { DataTable } from "@/components/tables/DataTable";
 
 interface RowData {
   id: string;

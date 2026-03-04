@@ -10,14 +10,26 @@ import {
   YAxis,
 } from "recharts";
 
-import { RevenuePoint } from "@/types";
+import { RevenuePoint, TimeRange } from "@/types";
 import { formatDate } from "@/lib/utils";
 
 interface RevenueAreaChartProps {
   data: RevenuePoint[];
+  range?: TimeRange;
 }
 
-export function RevenueAreaChart({ data }: RevenueAreaChartProps) {
+function formatXLabel(value: string, range: TimeRange) {
+  if (range === "day") {
+    const d = new Date(value);
+    return `${d.getHours()}:00`;
+  }
+  if (range === "year") {
+    return new Date(value).toLocaleString("default", { month: "short" });
+  }
+  return formatDate(value).split(",")[0];
+}
+
+export function RevenueAreaChart({ data, range = "month" }: RevenueAreaChartProps) {
   return (
     <div className="h-80 w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -31,7 +43,7 @@ export function RevenueAreaChart({ data }: RevenueAreaChartProps) {
           <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="4 4" />
           <XAxis
             dataKey="date"
-            tickFormatter={(value: string) => formatDate(value).split(",")[0]}
+            tickFormatter={(value: string) => formatXLabel(value, range)}
             tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
             axisLine={false}
             tickLine={false}
@@ -57,6 +69,9 @@ export function RevenueAreaChart({ data }: RevenueAreaChartProps) {
             stroke="hsl(var(--primary))"
             strokeWidth={2}
             fill="url(#revenueGradient)"
+            isAnimationActive
+            animationDuration={600}
+            animationEasing="ease-out"
           />
         </AreaChart>
       </ResponsiveContainer>

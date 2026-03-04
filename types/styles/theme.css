@@ -23,6 +23,12 @@
 
   --border: 214 32% 88%;
   --ring: 217 91% 60%;
+
+  --chart-axis: 217 19% 35%;
+  --chart-grid: 214 32% 88%;
+  --chart-completed: 142 71% 45%;
+  --chart-processing: 217 91% 60%;
+  --chart-cancelled: 0 84% 60%;
 }
 
 .dark {
@@ -50,4 +56,10 @@
 
   --border: 217 33% 24%;
   --ring: 217 91% 64%;
+
+  --chart-axis: 215 20% 80%;
+  --chart-grid: 217 33% 24%;
+  --chart-completed: 142 70% 55%;
+  --chart-processing: 217 91% 64%;
+  --chart-cancelled: 0 72% 60%;
 }

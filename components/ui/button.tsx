@@ -16,6 +16,8 @@ const buttonVariants = cva(
           "border-transparent bg-primary text-primary-foreground hover:bg-primary/90",
         secondary:
           "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/90",
+        outline:
+          "border-border bg-transparent text-foreground hover:bg-muted",
         ghost:
           "border-transparent bg-transparent text-foreground hover:bg-muted",
         danger:
@@ -36,7 +38,7 @@ const buttonVariants = cva(
 
 interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   loading?: boolean;
 }

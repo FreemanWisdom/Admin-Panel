@@ -1,4 +1,4 @@
-@import "../styles/theme.css";
+@import "../types/styles/theme.css";
 
 @tailwind base;
 @tailwind components;
@@ -34,10 +34,10 @@
 
 @layer components {
   .surface {
-    @apply rounded-lg border border-border bg-surface shadow-card;
+    @apply rounded-xl border border-border bg-surface shadow-sm transition-shadow duration-300 hover:shadow-md dark:shadow-none;
   }
 
   .focus-ring {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-shadow duration-200;
   }
 }

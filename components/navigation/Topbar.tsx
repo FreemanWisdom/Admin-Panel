@@ -2,12 +2,13 @@
 
 import { Bell, ChevronDown, Menu, Search, Sidebar as SidebarIcon } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Dropdown } from "@/components/ui/dropdown";
 import { Input } from "@/components/ui/input";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { ThemeToggle } from "@/components/navigation/ThemeToggle";
 
 interface TopbarProps {
   collapsed: boolean;
@@ -36,17 +37,18 @@ export function Topbar({
   };
 
   return (
-    <header className="surface sticky top-4 z-30 mx-4 flex h-16 items-center justify-between gap-3 px-4 lg:mx-0 lg:mr-4">
+    <header className="bg-surface/70 border-border sticky top-4 z-30 mx-4 flex h-[70px] shrink-0 items-center justify-between gap-3 rounded-2xl border px-4 backdrop-blur-md transition-all duration-300 lg:px-8">
       <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onOpenMobileMenu}
-          className="lg:hidden"
-          aria-label="Open sidebar"
-        >
-          <Menu className="size-4" />
-        </Button>
+        <motion.div whileTap={{ scale: 0.92 }} className="lg:hidden">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onOpenMobileMenu}
+            aria-label="Open sidebar"
+          >
+            <Menu className="size-4" />
+          </Button>
+        </motion.div>
 
         <Button
           variant="ghost"

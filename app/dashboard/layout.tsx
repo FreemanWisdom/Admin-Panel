@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 
-import { AuthGuard } from "@/components/layout/auth-guard";
-import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { AuthGuard } from "@/components/layout/AuthGuard";
+import { DashboardShell } from "@/components/layout/DashboardShell";
 
 interface DashboardLayoutProps {
   children: ReactNode;

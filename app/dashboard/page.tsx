@@ -2,15 +2,18 @@
 
 import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
-import { Activity, DollarSign, ShoppingCart, Users } from "lucide-react";
+import { Activity, DollarSign, ShoppingCart, Users, TrendingUp } from "lucide-react";
+import { motion, Variants } from "framer-motion";
 
 import {
   getDailyUsersSeries,
   getDashboardStats,
   getRecentOrders,
   getRevenueSeries,
+  getMapData,
 } from "@/lib/api";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { useTimeRange } from "@/hooks/use-time-range";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -21,27 +24,28 @@ import {
 } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TimeRangeSelector } from "@/components/ui/time-range-selector";
 
 const RevenueAreaChart = dynamic(
   () =>
-    import("@/components/charts/revenue-area-chart").then(
+    import("@/components/charts/RevenueAreaChart").then(
       (module) => module.RevenueAreaChart,
     ),
-  {
-    ssr: false,
-    loading: () => <Skeleton className="h-80 w-full" />,
-  },
+  { ssr: false, loading: () => <Skeleton className="h-80 w-full" /> },
 );
 
 const DailyUsersBarChart = dynamic(
   () =>
-    import("@/components/charts/daily-users-bar-chart").then(
+    import("@/components/charts/DailyUsersBarChart").then(
       (module) => module.DailyUsersBarChart,
     ),
-  {
-    ssr: false,
-    loading: () => <Skeleton className="h-80 w-full" />,
-  },
+  { ssr: false, loading: () => <Skeleton className="h-80 w-full" /> },
+);
+
+const WorldMap = dynamic(
+  () =>
+    import("@/components/charts/WorldMap").then((module) => module.WorldMap),
+  { ssr: false, loading: () => <Skeleton className="h-[340px] w-full" /> },
 );
 
 const statusVariantMap = {
@@ -50,25 +54,42 @@ const statusVariantMap = {
   cancelled: "danger",
 } as const;
 
+const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.08, duration: 0.4 },
+  }),
+};
+
 export default function DashboardPage() {
+  const { range: revenueRange, setRange: setRevenueRange } = useTimeRange("month");
+  const { range: usersRange, setRange: setUsersRange } = useTimeRange("month");
+
   const statsQuery = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: getDashboardStats,
   });
 
   const revenueQuery = useQuery({
-    queryKey: ["revenue-series"],
-    queryFn: getRevenueSeries,
+    queryKey: ["revenue-series", revenueRange],
+    queryFn: () => getRevenueSeries(revenueRange),
   });
 
   const dailyUsersQuery = useQuery({
-    queryKey: ["daily-users-series"],
-    queryFn: getDailyUsersSeries,
+    queryKey: ["daily-users-series", usersRange],
+    queryFn: () => getDailyUsersSeries(usersRange),
   });
 
   const recentOrdersQuery = useQuery({
     queryKey: ["recent-orders"],
     queryFn: () => getRecentOrders(6),
+  });
+
+  const mapQuery = useQuery({
+    queryKey: ["map-data"],
+    queryFn: () => getMapData("month"),
   });
 
   const isError =
@@ -94,86 +115,137 @@ export default function DashboardPage() {
       value: stats?.totalUsers ? stats.totalUsers.toLocaleString() : "-",
       helper: "+4.2% from last week",
       icon: Users,
+      color: "text-blue-500",
     },
     {
       title: "Orders",
       value: stats?.orders ? stats.orders.toLocaleString() : "-",
       helper: "+2.7% from yesterday",
       icon: ShoppingCart,
+      color: "text-violet-500",
     },
     {
       title: "Revenue",
       value: stats?.revenue ? formatCurrency(stats.revenue) : "-",
       helper: "+8.5% from last month",
       icon: DollarSign,
+      color: "text-emerald-500",
     },
     {
       title: "Active Sessions",
       value: stats?.activeSessions ? stats.activeSessions.toLocaleString() : "-",
       helper: "121 live now",
       icon: Activity,
+      color: "text-amber-500",
     },
   ];
 
   return (
     <div className="space-y-6">
+      {/* Stat cards with stagger animation */}
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {statsQuery.isLoading
           ? Array.from({ length: 4 }).map((_, index) => (
-              <Card key={index}>
-                <CardHeader>
-                  <Skeleton className="h-4 w-24" />
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <Skeleton className="h-7 w-28" />
-                  <Skeleton className="h-4 w-36" />
-                </CardContent>
-              </Card>
-            ))
-          : statCards.map((item) => (
-              <Card key={item.title}>
+            <Card key={index}>
+              <CardHeader>
+                <Skeleton className="h-4 w-24" />
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Skeleton className="h-7 w-28" />
+                <Skeleton className="h-4 w-36" />
+              </CardContent>
+            </Card>
+          ))
+          : statCards.map((item, i) => (
+            <motion.div
+              key={item.title}
+              custom={i}
+              variants={cardVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <Card className="hover:shadow-md transition-shadow duration-200">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardDescription>{item.title}</CardDescription>
-                  <item.icon className="size-4 text-muted-foreground" aria-hidden />
+                  <div className={`rounded-md bg-muted p-1.5 ${item.color}`}>
+                    <item.icon className="size-3.5" aria-hidden />
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <p className="text-2xl font-semibold">{item.value}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{item.helper}</p>
+                  <p className="mt-1 flex items-center gap-1 text-xs text-emerald-500">
+                    <TrendingUp className="size-3" />
+                    {item.helper}
+                  </p>
                 </CardContent>
               </Card>
-            ))}
+            </motion.div>
+          ))}
       </section>
 
-      <section className="grid grid-cols-1 gap-4 2xl:grid-cols-2">
+      {/* Charts row */}
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Card>
-          <CardHeader>
-            <CardTitle>Revenue</CardTitle>
-            <CardDescription>Last 14 days</CardDescription>
+          <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle>Revenue</CardTitle>
+              <CardDescription>
+                {revenueRange === "day" ? "Last 24 hours" :
+                  revenueRange === "week" ? "Last 7 days" :
+                    revenueRange === "month" ? "Last 14 days" : "Last 12 months"}
+              </CardDescription>
+            </div>
+            <TimeRangeSelector value={revenueRange} onChange={setRevenueRange} />
           </CardHeader>
           <CardContent>
             {revenueQuery.isLoading ? (
               <Skeleton className="h-80 w-full" />
             ) : (
-              <RevenueAreaChart data={revenueQuery.data ?? []} />
+              <RevenueAreaChart data={revenueQuery.data ?? []} range={revenueRange} />
             )}
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Daily Users</CardTitle>
-            <CardDescription>Last 10 days</CardDescription>
+          <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle>Daily Users</CardTitle>
+              <CardDescription>
+                {usersRange === "day" ? "Hourly today" :
+                  usersRange === "week" ? "Last 7 days" :
+                    usersRange === "month" ? "Last 10 days" : "Last 12 months"}
+              </CardDescription>
+            </div>
+            <TimeRangeSelector value={usersRange} onChange={setUsersRange} />
           </CardHeader>
           <CardContent>
             {dailyUsersQuery.isLoading ? (
               <Skeleton className="h-80 w-full" />
             ) : (
-              <DailyUsersBarChart data={dailyUsersQuery.data ?? []} />
+              <DailyUsersBarChart data={dailyUsersQuery.data ?? []} range={usersRange} />
             )}
           </CardContent>
         </Card>
       </section>
 
+      {/* World Map */}
+      <section>
+        <Card>
+          <CardHeader>
+            <CardTitle>Global Orders Distribution</CardTitle>
+            <CardDescription>Order volume by country · Scroll to zoom · Drag to pan</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {mapQuery.isLoading ? (
+              <Skeleton className="h-[340px] w-full" />
+            ) : (
+              <WorldMap data={mapQuery.data ?? []} height={340} />
+            )}
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Recent Orders */}
       <section>
         <Card>
           <CardHeader>

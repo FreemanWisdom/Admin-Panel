@@ -1,135 +1,96 @@
-# Admin Panel Frontend
+# Admin Panel (Frontend Template)
 
-Production-grade admin dashboard frontend built with Next.js App Router, TypeScript, Tailwind CSS, TanStack Query, Recharts, Framer Motion, and Lucide icons.
+Buyer setup guide for the Admin Panel project.
 
-## Scope
+## What This Project Is
 
-This project is **frontend only**.
+This is a **frontend-only** Next.js admin dashboard template.
 
-- No database logic
-- No Prisma
-- No backend API implementation
-- Data layer uses mock API functions in `lib/api.ts` to represent existing REST endpoints
+- Built with Next.js, TypeScript, Tailwind CSS, and React Query
+- Includes mock API calls in `lib/api.ts`
+- No backend or database is included
 
-## Tech Stack
+## Requirements
 
-- Next.js 16 (App Router)
-- TypeScript
-- Tailwind CSS
-- TanStack Query (React Query)
-- Recharts
-- Framer Motion
-- Lucide React
-- ESLint + Prettier
-- Jest + React Testing Library
+- Node.js LTS (latest stable LTS recommended)
+- npm (comes with Node.js)
 
-## Folder Structure
+## Quick Start
 
-```txt
-app/
-  (auth)/
-    forgot-password/page.tsx
-    login/page.tsx
-    layout.tsx
-  (dashboard)/
-    dashboard/
-      orders/page.tsx
-      page.tsx
-    layout.tsx
-  globals.css
-  layout.tsx
-  page.tsx
-components/
-  charts/
-    daily-users-bar-chart.tsx
-    revenue-area-chart.tsx
-  layout/
-    auth-guard.tsx
-    dashboard-shell.tsx
-    sidebar.tsx
-    theme-toggle.tsx
-    topbar.tsx
-  table/
-    data-table.tsx
-  ui/
-    avatar.tsx
-    badge.tsx
-    button.tsx
-    card.tsx
-    dropdown.tsx
-    empty-state.tsx
-    input.tsx
-    modal.tsx
-    select.tsx
-    skeleton.tsx
-    toast.tsx
-  providers.tsx
-hooks/
-  use-debounce.ts
-  use-toast.ts
-lib/
-  api.ts
-  utils.ts
-types/
-  index.ts
-styles/
-  theme.css
-__tests__/
-  button.test.tsx
-  data-table.test.tsx
-  orders-page.test.tsx
-```
-
-## Getting Started
-
-### 1) Install dependencies
+1. Install dependencies:
 
 ```bash
 npm install
 ```
 
-### 2) Configure environment
+2. Create local environment file:
 
-Copy `.env.example` to `.env.local` and adjust values if needed.
+Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env.local
+```
+
+macOS/Linux:
 
 ```bash
 cp .env.example .env.local
 ```
 
-Example:
+3. Edit `.env.local`:
 
 ```env
 NEXT_PUBLIC_APP_NAME=Admin Panel
 NEXT_PUBLIC_API_BASE_URL=http://localhost:4000/api
 ```
 
-### 3) Start development server
+4. Run development server:
 
 ```bash
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+5. Open:
 
-## Commands
+`http://localhost:3000`
 
-- Dev: `npm run dev`
-- Build: `npm run build`
-- Start production server: `npm run start`
-- Lint: `npm run lint`
-- Format check: `npm run format`
-- Format write: `npm run format:write`
-- Test: `npm run test`
+## NPM Scripts
 
-## Auth Mock
+- `npm run dev` - Start development server
+- `npm run build` - Create production build
+- `npm run start` - Run production server
+- `npm run lint` - Run ESLint
+- `npm run test` - Run tests once
+- `npm run test:watch` - Run tests in watch mode
+- `npm run format` - Check formatting with Prettier
+- `npm run format:write` - Auto-format project
 
-Dashboard routes are protected by a frontend-only token check:
+## Production Setup
 
-- If `localStorage.admin_token` is missing, user is redirected to `/login`
-- On login submit, a mock token is stored and user is redirected to `/dashboard`
+1. Build app:
 
-## Notes
+```bash
+npm run build
+```
 
-- Charts are lazy-loaded with dynamic imports to optimize bundle size.
-- Layout is server-first; interactive sections are isolated to client components.
-- UI components are reusable, accessible, keyboard navigable, and responsive.
+2. Start app:
+
+```bash
+npm run start
+```
+
+The production server also runs on port `3000` by default.
+
+## Auth Note
+
+Authentication is mocked on the frontend:
+
+- App checks for `localStorage.admin_token`
+- Missing token redirects user to `/login`
+- Login page saves a mock token and redirects to `/dashboard`
+
+## Extra Buyer Documentation
+
+A short HTML install guide is included here:
+
+- [INSTALLATION.html](./INSTALLATION.html)

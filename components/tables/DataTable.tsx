@@ -27,6 +27,8 @@ interface DataTableProps<TData> {
   emptyDescription?: string;
   initialPageSize?: number;
   initialSorting?: SortingState;
+  hideSearch?: boolean;
+  hideRowsPerPage?: boolean;
 }
 
 export function DataTable<TData>({
@@ -38,6 +40,8 @@ export function DataTable<TData>({
   emptyDescription = "No records match your filters yet.",
   initialPageSize = 8,
   initialSorting = [],
+  hideSearch = false,
+  hideRowsPerPage = false,
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>(initialSorting);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -80,31 +84,39 @@ export function DataTable<TData>({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <Input
-          value={globalFilter}
-          onChange={(event) => setGlobalFilter(event.target.value)}
-          placeholder={searchPlaceholder}
-          aria-label="Search table"
-          className="max-w-sm"
-        />
+      {!hideSearch || !hideRowsPerPage ? (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {!hideSearch ? (
+            <Input
+              value={globalFilter}
+              onChange={(event) => setGlobalFilter(event.target.value)}
+              placeholder={searchPlaceholder}
+              aria-label="Search table"
+              className="max-w-sm"
+            />
+          ) : (
+            <div />
+          )}
 
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span>Rows per page</span>
-          <select
-            aria-label="Rows per page"
-            value={table.getState().pagination.pageSize}
-            onChange={(event) => table.setPageSize(Number(event.target.value))}
-            className="focus-ring rounded-md border border-border bg-surface px-2 py-1"
-          >
-            {[5, 8, 10, 20].map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </select>
+          {!hideRowsPerPage ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>Rows per page</span>
+              <select
+                aria-label="Rows per page"
+                value={table.getState().pagination.pageSize}
+                onChange={(event) => table.setPageSize(Number(event.target.value))}
+                className="focus-ring rounded-md border border-border bg-surface px-2 py-1"
+              >
+                {[5, 8, 10, 20].map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : null}
         </div>
-      </div>
+      ) : null}
 
       <div className="overflow-x-auto rounded-md border border-border">
         <table className="min-w-full text-left text-sm">
@@ -140,24 +152,24 @@ export function DataTable<TData>({
           <tbody className="divide-y divide-border bg-surface">
             {isLoading
               ? skeletonRows.map((_, rowIndex) => (
-                  <tr key={`skeleton-${rowIndex}`}>
-                    <td colSpan={columns.length} className="px-4 py-3">
-                      <Skeleton className="h-6 w-full" />
-                    </td>
-                  </tr>
-                ))
+                <tr key={`skeleton-${rowIndex}`}>
+                  <td colSpan={columns.length} className="px-4 py-3">
+                    <Skeleton className="h-6 w-full" />
+                  </td>
+                </tr>
+              ))
               : table.getRowModel().rows.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="transition-colors duration-200 hover:bg-muted/35"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="px-4 py-3 align-middle">
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
+                <tr
+                  key={row.id}
+                  className="transition-colors duration-200 hover:bg-muted/35"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id} className="px-4 py-3 align-middle">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>

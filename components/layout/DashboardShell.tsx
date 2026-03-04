@@ -3,8 +3,9 @@
 import { ReactNode, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
-import { Sidebar } from "@/components/layout/sidebar";
-import { Topbar } from "@/components/layout/topbar";
+import { Sidebar } from "@/components/navigation/Sidebar";
+import { Topbar } from "@/components/navigation/Topbar";
+import { PageTransition } from "@/components/layout/PageTransition";
 
 interface DashboardShellProps {
   children: ReactNode;
@@ -26,8 +27,8 @@ export function DashboardShell({ children }: DashboardShellProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-40 bg-black/45 lg:hidden"
+              transition={{ duration: 0.25, ease: "linear" }}
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
               onClick={() => setMobileOpen(false)}
               aria-label="Close sidebar overlay"
             />
@@ -35,24 +36,30 @@ export function DashboardShell({ children }: DashboardShellProps) {
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
+              transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
               className="fixed inset-y-0 left-0 z-50 w-72 lg:hidden"
             >
-              <Sidebar collapsed={false} onNavigate={() => setMobileOpen(false)} />
+              <Sidebar
+                collapsed={false}
+                isMobile
+                onNavigate={() => setMobileOpen(false)}
+              />
             </motion.div>
           </>
         ) : null}
       </AnimatePresence>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex h-screen min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
         <Topbar
           collapsed={collapsed}
           onToggleSidebar={() => setCollapsed((previous) => !previous)}
           onOpenMobileMenu={() => setMobileOpen(true)}
         />
-
-        <main className="px-4 pb-6 pt-4 lg:pr-4">
-          <div className="mx-auto w-full max-w-7xl space-y-6">{children}</div>
+        {/* Main content area */}
+        <main className="flex-1 px-4 pb-12 pt-4 lg:px-8 lg:pt-6">
+          <div className="mx-auto max-w-7xl">
+            <PageTransition>{children}</PageTransition>
+          </div>
         </main>
       </div>
     </div>

@@ -32,7 +32,7 @@ export function Providers({ children }: ProvidersProps) {
           <Toaster />
         </AppToastProvider>
         {process.env.NODE_ENV === "development" ? (
-          <ReactQueryDevtools initialIsOpen={false} />
+          <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />
         ) : null}
       </QueryClientProvider>
     </ThemeProvider>

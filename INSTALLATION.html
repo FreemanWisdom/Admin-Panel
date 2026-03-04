@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel Installation Guide</title>
+    <style>
+      :root {
+        --bg: #f4f7fb;
+        --card: #ffffff;
+        --text: #142033;
+        --muted: #4f5f78;
+        --accent: #0a66c2;
+        --border: #dbe3ef;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 100%);
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      .wrap {
+        max-width: 880px;
+        margin: 0 auto;
+        padding: 32px 20px 56px;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 24px;
+        box-shadow: 0 8px 24px rgba(18, 35, 70, 0.08);
+      }
+
+      h1,
+      h2 {
+        margin-top: 0;
+      }
+
+      h1 {
+        margin-bottom: 8px;
+        font-size: 30px;
+      }
+
+      h2 {
+        margin-bottom: 10px;
+        font-size: 20px;
+        color: #0f2f5e;
+      }
+
+      p {
+        margin-top: 0;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .section {
+        margin-top: 22px;
+      }
+
+      code {
+        background: #f1f6ff;
+        border: 1px solid #d8e6fb;
+        border-radius: 6px;
+        padding: 2px 7px;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 0.95em;
+      }
+
+      pre {
+        margin: 8px 0 0;
+        padding: 12px;
+        overflow: auto;
+        border: 1px solid #d8e6fb;
+        border-radius: 10px;
+        background: #f6faff;
+      }
+
+      pre code {
+        padding: 0;
+        border: 0;
+        background: transparent;
+      }
+
+      ul {
+        margin: 6px 0 0;
+        padding-left: 20px;
+      }
+
+      ol {
+        margin: 8px 0 0;
+        padding-left: 22px;
+      }
+
+      .scripts li {
+        margin: 4px 0;
+      }
+
+      a {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="card">
+        <h1>Admin Panel Installation Guide</h1>
+        <p class="muted">
+          Short setup guide for buyers. This project is frontend-only (Next.js).
+        </p>
+
+        <div class="section">
+          <h2>1) Requirements</h2>
+          <ul>
+            <li>Node.js (latest LTS recommended)</li>
+            <li>npm (included with Node.js)</li>
+          </ul>
+        </div>
+
+        <div class="section">
+          <h2>2) Install Dependencies</h2>
+          <pre><code>npm install</code></pre>
+        </div>
+
+        <div class="section">
+          <h2>3) Create Environment File</h2>
+          <p>Copy <code>.env.example</code> to <code>.env.local</code>.</p>
+          <p><strong>Windows PowerShell:</strong></p>
+          <pre><code>Copy-Item .env.example .env.local</code></pre>
+          <p><strong>macOS/Linux:</strong></p>
+          <pre><code>cp .env.example .env.local</code></pre>
+          <p>Set values like this:</p>
+          <pre><code>NEXT_PUBLIC_APP_NAME=Admin Panel
+NEXT_PUBLIC_API_BASE_URL=http://localhost:4000/api</code></pre>
+        </div>
+
+        <div class="section">
+          <h2>4) Run the Project</h2>
+          <pre><code>npm run dev</code></pre>
+          <p>Open <code>http://localhost:3000</code> in your browser.</p>
+        </div>
+
+        <div class="section">
+          <h2>5) Production Commands</h2>
+          <pre><code>npm run build
+npm run start</code></pre>
+        </div>
+
+        <div class="section">
+          <h2>Available Scripts</h2>
+          <ul class="scripts">
+            <li><code>npm run dev</code> - Development server</li>
+            <li><code>npm run build</code> - Production build</li>
+            <li><code>npm run start</code> - Start production server</li>
+            <li><code>npm run lint</code> - Lint checks</li>
+            <li><code>npm run test</code> - Run tests</li>
+            <li><code>npm run test:watch</code> - Run tests in watch mode</li>
+            <li><code>npm run format</code> - Check formatting</li>
+            <li><code>npm run format:write</code> - Auto-format code</li>
+          </ul>
+        </div>
+
+        <div class="section">
+          <h2>Important Note</h2>
+          <p>
+            This package does not include backend/database code. Connect
+            <code>NEXT_PUBLIC_API_BASE_URL</code> to your own API.
+          </p>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
