@@ -84,7 +84,7 @@ export default function MapsPage() {
                 <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <CardTitle>Global Orders Map</CardTitle>
-                        <CardDescription>Scroll to zoom · Drag to pan · Hover for details</CardDescription>
+                        <CardDescription>Hover over markers to view country details</CardDescription>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                         <Button variant="outline" size="sm" onClick={handleExportCSV}>

@@ -233,7 +233,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Global Orders Distribution</CardTitle>
-            <CardDescription>Order volume by country · Scroll to zoom · Drag to pan</CardDescription>
+            <CardDescription>Order volume by country · Hover markers for details</CardDescription>
           </CardHeader>
           <CardContent>
             {mapQuery.isLoading ? (
