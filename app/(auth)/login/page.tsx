@@ -7,6 +7,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,8 +25,14 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
+const MOCK_LOGIN = {
+  email: "admin@example.com",
+  password: "admin123",
+};
+
 export default function LoginPage() {
   const router = useRouter();
+  const { pushToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -36,8 +43,8 @@ export default function LoginPage() {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: MOCK_LOGIN.email,
+      password: MOCK_LOGIN.password,
     },
   });
 
@@ -49,13 +56,33 @@ export default function LoginPage() {
     }
   }, [router]);
 
-  const onSubmit = handleSubmit(async () => {
+  const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
     setIsSubmitting(true);
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 650));
+
+      const email = values.email.trim().toLowerCase();
+      const isMockLogin =
+        email === MOCK_LOGIN.email && values.password === MOCK_LOGIN.password;
+
+      if (!isMockLogin) {
+        setFormError("Invalid login details. Use the mock credentials.");
+        pushToast({
+          title: "Invalid login",
+          description: `Use ${MOCK_LOGIN.email} / ${MOCK_LOGIN.password}`,
+          variant: "warning",
+        });
+        return;
+      }
+
       localStorage.setItem("admin_token", "mock-admin-token");
+      pushToast({
+        title: "Logged in",
+        description: "Mock login accepted. Redirecting to dashboard.",
+        variant: "success",
+      });
       router.push("/dashboard");
     } catch {
       setFormError("Unable to log in. Please try again.");
