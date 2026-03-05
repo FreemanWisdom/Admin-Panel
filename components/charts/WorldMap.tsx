@@ -1,8 +1,27 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { geoNaturalEarth1, geoPath } from "d3-geo";
+import {
+    type MouseEvent,
+    type PointerEvent,
+    type WheelEvent,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
+import type { GeometryCollection, Topology } from "topojson-specification";
+import { feature } from "topojson-client";
 import { MapCountry, MapLevel } from "@/types";
 import { motion } from "framer-motion";
+
+const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+const MAP_WIDTH = 1000;
+const MAP_HEIGHT = 460;
+const MAP_CENTER_X = MAP_WIDTH / 2;
+const MAP_CENTER_Y = MAP_HEIGHT / 2;
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 6;
 
 const LEVEL_COLORS: Record<MapLevel, string> = {
     highest: "#0f766e",
@@ -18,7 +37,6 @@ const LEVEL_LABELS: Record<MapLevel, string> = {
     lowest: "Lowest (<50)",
 };
 
-type MapPoint = { x: number; y: number };
 type TooltipState = {
     country: string;
     orders: number;
@@ -27,61 +45,239 @@ type TooltipState = {
     y: number;
 };
 
-type MarkerEntry = MapCountry & MapPoint & { radius: number };
+type CountryFeature = GeoJSON.Feature<
+    GeoJSON.Geometry,
+    { name?: string } & Record<string, unknown>
+> & { id?: string | number };
 
-const COUNTRY_POINTS: Record<string, MapPoint> = {
-    US: { x: 190, y: 170 },
-    CA: { x: 180, y: 120 },
-    MX: { x: 175, y: 225 },
-    BR: { x: 300, y: 310 },
-    AR: { x: 300, y: 390 },
-    GB: { x: 485, y: 120 },
-    FR: { x: 500, y: 145 },
-    DE: { x: 515, y: 135 },
-    ES: { x: 485, y: 170 },
-    IT: { x: 530, y: 175 },
-    NL: { x: 506, y: 124 },
-    NO: { x: 520, y: 84 },
-    SE: { x: 545, y: 100 },
-    PL: { x: 553, y: 135 },
-    TR: { x: 595, y: 185 },
-    EG: { x: 560, y: 225 },
-    RU: { x: 665, y: 95 },
-    NG: { x: 520, y: 270 },
-    ZA: { x: 570, y: 382 },
-    IN: { x: 685, y: 230 },
-    CN: { x: 760, y: 185 },
-    KR: { x: 810, y: 165 },
-    JP: { x: 845, y: 175 },
-    AU: { x: 810, y: 355 },
-    NZ: { x: 895, y: 390 },
+type WorldAtlasTopology = Topology;
+
+const NUMERIC_TO_A2: Record<string, string> = {
+    "840": "US",
+    "826": "GB",
+    "276": "DE",
+    "250": "FR",
+    "124": "CA",
+    "036": "AU",
+    "356": "IN",
+    "156": "CN",
+    "076": "BR",
+    "392": "JP",
+    "643": "RU",
+    "484": "MX",
+    "410": "KR",
+    "380": "IT",
+    "724": "ES",
+    "528": "NL",
+    "752": "SE",
+    "578": "NO",
+    "554": "NZ",
+    "032": "AR",
+    "710": "ZA",
+    "566": "NG",
+    "818": "EG",
+    "792": "TR",
+    "616": "PL",
 };
-
 interface WorldMapProps {
     data: MapCountry[];
     height?: number;
 }
 
+type Pan = { x: number; y: number };
+type DragState = {
+    pointerId: number;
+    startX: number;
+    startY: number;
+    startPan: Pan;
+};
+
+function clamp(value: number, min: number, max: number) {
+    return Math.min(max, Math.max(min, value));
+}
+
 export function WorldMap({ data, height = 340 }: WorldMapProps) {
     const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+    const [countries, setCountries] = useState<CountryFeature[]>([]);
+    const [loadFailed, setLoadFailed] = useState(false);
+    const [zoom, setZoom] = useState(1);
+    const [pan, setPan] = useState<Pan>({ x: 0, y: 0 });
+    const [isDragging, setIsDragging] = useState(false);
 
-    const markers = useMemo<MarkerEntry[]>(() => {
-        if (data.length === 0) return [];
+    const svgRef = useRef<SVGSVGElement | null>(null);
+    const dragRef = useRef<DragState | null>(null);
 
-        const minOrders = Math.min(...data.map((entry) => entry.totalOrders));
-        const maxOrders = Math.max(...data.map((entry) => entry.totalOrders));
-        const spread = maxOrders - minOrders;
-
-        return data.flatMap((entry) => {
-            const point = COUNTRY_POINTS[entry.countryCode];
-            if (!point) return [];
-
-            const ratio = spread === 0 ? 0.5 : (entry.totalOrders - minOrders) / spread;
-            const radius = 6 + ratio * 12;
-
-            return [{ ...entry, ...point, radius }];
-        });
+    const countryMap = useMemo(() => {
+        return new Map(data.map((entry) => [entry.countryCode.toUpperCase(), entry]));
     }, [data]);
+
+    useEffect(() => {
+        let active = true;
+
+        async function loadGeography() {
+            try {
+                const response = await fetch(GEO_URL);
+                if (!response.ok) {
+                    throw new Error("Failed to fetch world geography");
+                }
+
+                const topology = (await response.json()) as WorldAtlasTopology;
+                const countriesObject = (topology.objects as Record<string, GeometryCollection>)["countries"];
+                if (!countriesObject) {
+                    throw new Error("Countries object missing from topology");
+                }
+
+                const geo = feature(topology, countriesObject);
+                if (geo.type !== "FeatureCollection") {
+                    throw new Error("Unexpected world atlas geometry");
+                }
+
+                if (active) {
+                    setCountries(geo.features as CountryFeature[]);
+                    setLoadFailed(false);
+                }
+            } catch {
+                if (active) {
+                    setCountries([]);
+                    setLoadFailed(true);
+                }
+            }
+        }
+
+        void loadGeography();
+
+        return () => {
+            active = false;
+        };
+    }, []);
+
+    const projection = useMemo(() => {
+        if (countries.length === 0) return null;
+        const collection: GeoJSON.FeatureCollection<GeoJSON.Geometry> = {
+            type: "FeatureCollection",
+            features: countries,
+        };
+        return geoNaturalEarth1().fitExtent(
+            [
+                [10, 10],
+                [MAP_WIDTH - 10, MAP_HEIGHT - 10],
+            ],
+            collection,
+        );
+    }, [countries]);
+
+    const pathGenerator = useMemo(
+        () => (projection ? geoPath(projection) : null),
+        [projection],
+    );
+
+    function getCountryEntry(featureId: string | number | undefined) {
+        const numericId = String(featureId ?? "").padStart(3, "0");
+        const code = NUMERIC_TO_A2[numericId];
+        if (!code) return null;
+        return countryMap.get(code) ?? null;
+    }
+
+    function handleMouseEnter(
+        event: MouseEvent<SVGPathElement>,
+        geo: CountryFeature,
+        entry: MapCountry | null,
+    ) {
+        if (!entry || isDragging) return;
+        setTooltip({
+            country: entry.country || geo.properties?.name || "Unknown country",
+            orders: entry.totalOrders,
+            level: entry.level,
+            x: event.clientX,
+            y: event.clientY,
+        });
+    }
+
+    function clampPan(nextPan: Pan, nextZoom: number) {
+        const maxX = ((nextZoom - 1) * MAP_WIDTH) / 2;
+        const maxY = ((nextZoom - 1) * MAP_HEIGHT) / 2;
+
+        return {
+            x: clamp(nextPan.x, -maxX, maxX),
+            y: clamp(nextPan.y, -maxY, maxY),
+        };
+    }
+
+    function handleWheel(event: WheelEvent<SVGSVGElement>) {
+        event.preventDefault();
+        setZoom((currentZoom) => {
+            const factor = event.deltaY < 0 ? 1.12 : 0.88;
+            const nextZoom = clamp(currentZoom * factor, MIN_ZOOM, MAX_ZOOM);
+
+            if (nextZoom === currentZoom) return currentZoom;
+
+            setPan((currentPan) => clampPan(currentPan, nextZoom));
+            return nextZoom;
+        });
+    }
+
+    function handlePointerDown(event: PointerEvent<SVGSVGElement>) {
+        if (event.pointerType === "mouse" && event.button !== 0) return;
+
+        dragRef.current = {
+            pointerId: event.pointerId,
+            startX: event.clientX,
+            startY: event.clientY,
+            startPan: pan,
+        };
+        setIsDragging(true);
+        setTooltip(null);
+        event.currentTarget.setPointerCapture(event.pointerId);
+    }
+
+    function handlePointerMove(event: PointerEvent<SVGSVGElement>) {
+        const dragState = dragRef.current;
+        const svg = svgRef.current;
+        if (!dragState || !svg || dragState.pointerId !== event.pointerId) return;
+
+        const rect = svg.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+
+        const dx = ((event.clientX - dragState.startX) / rect.width) * MAP_WIDTH;
+        const dy = ((event.clientY - dragState.startY) / rect.height) * MAP_HEIGHT;
+
+        setPan(clampPan({ x: dragState.startPan.x + dx, y: dragState.startPan.y + dy }, zoom));
+    }
+
+    function handlePointerUp(event: PointerEvent<SVGSVGElement>) {
+        const dragState = dragRef.current;
+        if (!dragState || dragState.pointerId !== event.pointerId) return;
+
+        dragRef.current = null;
+        setIsDragging(false);
+
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+            event.currentTarget.releasePointerCapture(event.pointerId);
+        }
+    }
+
+    function zoomIn() {
+        setZoom((currentZoom) => {
+            const nextZoom = clamp(currentZoom * 1.2, MIN_ZOOM, MAX_ZOOM);
+            setPan((currentPan) => clampPan(currentPan, nextZoom));
+            return nextZoom;
+        });
+    }
+
+    function zoomOut() {
+        setZoom((currentZoom) => {
+            const nextZoom = clamp(currentZoom * 0.8, MIN_ZOOM, MAX_ZOOM);
+            setPan((currentPan) => clampPan(currentPan, nextZoom));
+            return nextZoom;
+        });
+    }
+
+    function resetView() {
+        setZoom(1);
+        setPan({ x: 0, y: 0 });
+    }
+
+    const transform = `translate(${pan.x} ${pan.y}) translate(${MAP_CENTER_X} ${MAP_CENTER_Y}) scale(${zoom}) translate(${-MAP_CENTER_X} ${-MAP_CENTER_Y})`;
 
     return (
         <motion.div
@@ -92,60 +288,75 @@ export function WorldMap({ data, height = 340 }: WorldMapProps) {
             style={{ height }}
         >
             <svg
+                ref={svgRef}
                 viewBox="0 0 1000 460"
-                className="h-full w-full"
+                className={`h-full w-full ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
                 role="img"
                 aria-label="Global orders map"
+                style={{ touchAction: "none" }}
+                onWheel={handleWheel}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerUp}
             >
-                {/* Abstract world silhouette to avoid third-party map dependency */}
-                <g fill="hsl(var(--muted))" opacity="0.35">
-                    <path d="M58 111 141 88 214 94 263 114 300 153 304 201 269 234 235 248 182 251 131 231 92 190 68 153z" />
-                    <path d="M264 248 294 264 314 297 325 344 314 399 290 434 266 432 247 395 244 348 250 293z" />
-                    <path d="M438 99 533 85 635 94 729 105 812 118 904 141 920 176 905 210 854 227 790 233 725 226 657 207 614 226 564 228 520 212 488 188 459 157z" />
-                    <path d="M541 230 580 239 618 261 648 305 661 354 647 399 617 424 581 417 554 386 539 343 531 292z" />
-                    <path d="M770 292 823 282 886 304 931 350 924 389 878 412 820 404 780 376 760 332z" />
-                </g>
+                <rect
+                    x="0"
+                        y="0"
+                        width="1000"
+                        height="460"
+                    fill="hsl(var(--surface))"
+                    opacity="0.3"
+                />
+                <g transform={transform}>
+                    {countries.map((geo, index) => {
+                        const path = pathGenerator?.(geo) ?? "";
+                        if (!path) return null;
 
-                <g>
-                    {markers.map((marker, index) => (
-                        <motion.circle
-                            key={marker.countryCode}
-                            cx={marker.x}
-                            cy={marker.y}
-                            initial={{ opacity: 0, r: 0 }}
-                            animate={{ opacity: 0.95, r: marker.radius }}
-                            transition={{ duration: 0.35, delay: index * 0.02 }}
-                            fill={LEVEL_COLORS[marker.level]}
-                            stroke="#ffffff"
-                            strokeWidth={2}
-                            className="cursor-pointer"
-                            onMouseEnter={(event) =>
-                                setTooltip({
-                                    country: marker.country,
-                                    orders: marker.totalOrders,
-                                    level: marker.level,
-                                    x: event.clientX,
-                                    y: event.clientY,
-                                })
-                            }
-                            onMouseMove={(event) => {
-                                setTooltip((current) =>
-                                    current && current.country === marker.country
-                                        ? { ...current, x: event.clientX, y: event.clientY }
-                                        : current,
-                                );
-                            }}
-                            onMouseLeave={() => setTooltip(null)}
-                        >
-                            <title>{`${marker.country}: ${marker.totalOrders.toLocaleString()} orders`}</title>
-                        </motion.circle>
-                    ))}
+                        const entry = getCountryEntry(geo.id);
+                        const fill = entry ? LEVEL_COLORS[entry.level] : "hsl(var(--muted))";
+
+                        return (
+                            <motion.path
+                                key={String(geo.id ?? index)}
+                                d={path}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.35, delay: index * 0.002 }}
+                                fill={fill}
+                                stroke="hsl(var(--background))"
+                                strokeWidth={0.6}
+                                className={entry ? "cursor-pointer" : undefined}
+                                onMouseEnter={(event) =>
+                                    handleMouseEnter(event, geo, entry)
+                                }
+                                onMouseMove={(event) => {
+                                    setTooltip((current) =>
+                                        current
+                                            ? {
+                                                  ...current,
+                                                  x: event.clientX,
+                                                  y: event.clientY,
+                                              }
+                                            : current,
+                                    );
+                                }}
+                                onMouseLeave={() => setTooltip(null)}
+                            />
+                        );
+                    })}
                 </g>
             </svg>
 
-            {markers.length === 0 && (
+            {loadFailed && (
                 <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
-                    No mappable countries for the selected range.
+                    Unable to load map geometry.
+                </div>
+            )}
+
+            {!loadFailed && countries.length === 0 && (
+                <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
+                    Loading map...
                 </div>
             )}
 
@@ -169,6 +380,35 @@ export function WorldMap({ data, height = 340 }: WorldMapProps) {
                         <span className="text-muted-foreground">{label}</span>
                     </div>
                 ))}
+            </div>
+
+            <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-md border border-border bg-surface/90 p-1.5 text-xs backdrop-blur-sm">
+                <button
+                    type="button"
+                    className="rounded border border-border px-2 py-1 text-foreground hover:bg-muted"
+                    onClick={zoomOut}
+                    aria-label="Zoom out"
+                >
+                    -
+                </button>
+                <span className="min-w-12 text-center font-medium text-muted-foreground">
+                    {Math.round(zoom * 100)}%
+                </span>
+                <button
+                    type="button"
+                    className="rounded border border-border px-2 py-1 text-foreground hover:bg-muted"
+                    onClick={zoomIn}
+                    aria-label="Zoom in"
+                >
+                    +
+                </button>
+                <button
+                    type="button"
+                    className="rounded border border-border px-2 py-1 text-foreground hover:bg-muted"
+                    onClick={resetView}
+                >
+                    Reset
+                </button>
             </div>
         </motion.div>
     );
