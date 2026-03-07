@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 interface DropdownItem {
   label: string;
+  icon?: ReactNode;
   onSelect: () => void;
   destructive?: boolean;
 }
@@ -25,7 +26,7 @@ export function Dropdown({ trigger, items, align = "end" }: DropdownProps) {
         <DropdownMenu.Content
           align={align}
           className={cn(
-            "z-50 min-w-44 rounded-md border border-border bg-surface p-1 shadow-card",
+            "z-40 min-w-44 rounded-md border border-border bg-surface dark:bg-gray-900 dark:text-gray-100 p-1 shadow-card",
             "data-[state=open]:animate-in data-[state=closed]:animate-out",
           )}
         >
@@ -37,10 +38,13 @@ export function Dropdown({ trigger, items, align = "end" }: DropdownProps) {
                 "focus-ring cursor-pointer rounded px-3 py-2 text-sm",
                 item.destructive
                   ? "text-danger hover:bg-danger/10"
-                  : "text-foreground hover:bg-muted",
+                  : "text-foreground hover:bg-muted dark:hover:bg-gray-800",
               )}
             >
-              {item.label}
+              <div className="flex items-center gap-2 w-full">
+                {item.icon && <span className="flex items-center justify-center shrink-0">{item.icon}</span>}
+                <span>{item.label}</span>
+              </div>
             </DropdownMenu.Item>
           ))}
         </DropdownMenu.Content>
@@ -48,3 +52,4 @@ export function Dropdown({ trigger, items, align = "end" }: DropdownProps) {
     </DropdownMenu.Root>
   );
 }
+

@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   UserCog,
   Lock,
+  CircleDot
 } from "lucide-react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { useState } from "react";
@@ -26,10 +27,12 @@ interface SidebarProps {
 
 const navItems = [
   {
-    href: "/dashboard",
     label: "Dashboard",
     icon: LayoutDashboard,
-    exact: true,
+    subItems: [
+      { href: "/dashboard/dashboard1", label: "Dashboard 1" },
+      { href: "/dashboard/dashboard2", label: "Dashboard 2" },
+    ],
   },
   {
     href: "/dashboard/orders",
@@ -57,7 +60,10 @@ const settingsSubItems = [
 export function Sidebar({ collapsed, onNavigate, isMobile }: SidebarProps) {
   const pathname = usePathname();
   const [settingsOpen, setSettingsOpen] = useState(
-    pathname.startsWith("/dashboard/settings"),
+    pathname.startsWith("/dashboard/settings")
+  );
+  const [dashboardOpen, setDashboardOpen] = useState(
+    pathname === "/dashboard" || pathname.startsWith("/dashboard/dashboard")
   );
 
   const isSettingsActive = pathname.startsWith("/dashboard/settings");
@@ -88,7 +94,7 @@ export function Sidebar({ collapsed, onNavigate, isMobile }: SidebarProps) {
       transition={{ duration: 0.2, ease: "easeInOut" }}
       className={cn(
         "surface shrink-0 overflow-hidden",
-        isMobile ? "h-full rounded-none border-y-0 border-l-0" : "sticky top-4 m-4 hidden h-[calc(100vh-2rem)] lg:block",
+        isMobile ? "h-full rounded-none border-y-0 border-l-0" : "sticky top-4 m-4 hidden h-[calc(100vh-2rem)] lg:block"
       )}
       aria-label="Sidebar"
     >
@@ -107,21 +113,87 @@ export function Sidebar({ collapsed, onNavigate, isMobile }: SidebarProps) {
           aria-label="Primary navigation"
         >
           {navItems.map((item) => {
-            const isActive = item.exact
-              ? pathname === item.href
-              : pathname === item.href || pathname.startsWith(`${item.href}/`);
+            if (item.subItems) {
+              const isGroupActive = pathname.startsWith("/dashboard/dashboard") || pathname === "/dashboard";
+              return (
+                <motion.div key={item.label} variants={isMobile ? itemVariants : undefined}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!collapsed) setDashboardOpen((prev) => !prev);
+                    }}
+                    className={cn(
+                      "focus-ring flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200",
+                      isGroupActive
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                      collapsed && "justify-center"
+                    )}
+                  >
+                    <item.icon className="size-4 shrink-0" aria-hidden />
+                    {!collapsed && (
+                      <>
+                        <span className="flex-1 text-left">{item.label}</span>
+                        <ChevronDown
+                          className={cn(
+                            "size-3.5 shrink-0 transition-transform duration-200",
+                            dashboardOpen && "rotate-180"
+                          )}
+                        />
+                      </>
+                    )}
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {dashboardOpen && !collapsed && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-1 space-y-0.5 pl-4">
+                          {item.subItems.map((sub) => {
+                            const isSubActive = pathname === sub.href;
+                            return (
+                              <Link
+                                key={sub.label}
+                                href={sub.href}
+                                onClick={onNavigate}
+                                className={cn(
+                                  "focus-ring flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200",
+                                  isSubActive
+                                    ? "bg-primary/10 text-primary"
+                                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                )}
+                              >
+                                <CircleDot className="size-2 shrink-0 opacity-50" aria-hidden />
+                                <span>{sub.label}</span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            }
+
+            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
             return (
               <motion.div key={item.label} variants={isMobile ? itemVariants : undefined}>
                 <Link
-                  href={item.href}
+                  href={item.href!}
                   onClick={onNavigate}
                   className={cn(
                     "focus-ring flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200",
                     isActive
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                    collapsed && "justify-center",
+                    collapsed && "justify-center"
                   )}
                 >
                   <item.icon className="size-4 shrink-0" aria-hidden />
@@ -143,7 +215,7 @@ export function Sidebar({ collapsed, onNavigate, isMobile }: SidebarProps) {
                 isSettingsActive
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                collapsed && "justify-center",
+                collapsed && "justify-center"
               )}
             >
               <Settings2 className="size-4 shrink-0" aria-hidden />
@@ -153,7 +225,7 @@ export function Sidebar({ collapsed, onNavigate, isMobile }: SidebarProps) {
                   <ChevronDown
                     className={cn(
                       "size-3.5 shrink-0 transition-transform duration-200",
-                      settingsOpen && "rotate-180",
+                      settingsOpen && "rotate-180"
                     )}
                   />
                 </>
@@ -183,7 +255,7 @@ export function Sidebar({ collapsed, onNavigate, isMobile }: SidebarProps) {
                             "focus-ring flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200",
                             isSubActive
                               ? "bg-primary/10 text-primary"
-                              : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                              : "text-muted-foreground hover:bg-muted hover:text-foreground"
                           )}
                         >
                           <sub.icon className="size-3.5 shrink-0" aria-hidden />

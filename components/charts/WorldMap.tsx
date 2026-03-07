@@ -302,9 +302,9 @@ export function WorldMap({ data, height = 340 }: WorldMapProps) {
             >
                 <rect
                     x="0"
-                        y="0"
-                        width="1000"
-                        height="460"
+                    y="0"
+                    width="1000"
+                    height="460"
                     fill="hsl(var(--surface))"
                     opacity="0.3"
                 />
@@ -334,10 +334,10 @@ export function WorldMap({ data, height = 340 }: WorldMapProps) {
                                     setTooltip((current) =>
                                         current
                                             ? {
-                                                  ...current,
-                                                  x: event.clientX,
-                                                  y: event.clientY,
-                                              }
+                                                ...current,
+                                                x: event.clientX,
+                                                y: event.clientY,
+                                            }
                                             : current,
                                     );
                                 }}
@@ -362,7 +362,7 @@ export function WorldMap({ data, height = 340 }: WorldMapProps) {
 
             {tooltip && (
                 <div
-                    className="pointer-events-none fixed z-50 rounded-lg border border-border bg-surface px-3 py-2 text-xs shadow-lg"
+                    className="pointer-events-none fixed z-50 rounded-lg border border-border bg-surface dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700 px-3 py-2 text-xs shadow-lg"
                     style={{ left: tooltip.x + 12, top: tooltip.y - 36 }}
                 >
                     <p className="font-semibold">{tooltip.country}</p>
@@ -370,33 +370,33 @@ export function WorldMap({ data, height = 340 }: WorldMapProps) {
                 </div>
             )}
 
-            <div className="absolute bottom-2 left-2 flex flex-col gap-1 rounded-md border border-border bg-surface/90 p-2 text-xs backdrop-blur-sm">
+            <div className="absolute bottom-2 left-2 flex flex-col gap-1 rounded-md border border-border bg-surface/90 dark:bg-gray-900/90 dark:border-gray-700 p-2 text-xs backdrop-blur-sm">
                 {(Object.entries(LEVEL_LABELS) as [MapLevel, string][]).map(([level, label]) => (
                     <div key={level} className="flex items-center gap-1.5">
                         <span
                             className="inline-block size-2.5 rounded-full"
                             style={{ backgroundColor: LEVEL_COLORS[level] }}
                         />
-                        <span className="text-muted-foreground">{label}</span>
+                        <span className="text-muted-foreground dark:text-gray-300">{label}</span>
                     </div>
                 ))}
             </div>
 
-            <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-md border border-border bg-surface/90 p-1.5 text-xs backdrop-blur-sm">
+            <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-md border border-border bg-surface/90 dark:bg-gray-900/90 dark:border-gray-700 p-1.5 text-xs backdrop-blur-sm">
                 <button
                     type="button"
-                    className="rounded border border-border px-2 py-1 text-foreground hover:bg-muted"
+                    className="rounded border border-border dark:border-gray-700 px-2 py-1 text-foreground dark:text-gray-100 hover:bg-muted dark:hover:bg-gray-800"
                     onClick={zoomOut}
                     aria-label="Zoom out"
                 >
                     -
                 </button>
-                <span className="min-w-12 text-center font-medium text-muted-foreground">
+                <span className="min-w-12 text-center font-medium text-muted-foreground dark:text-gray-300">
                     {Math.round(zoom * 100)}%
                 </span>
                 <button
                     type="button"
-                    className="rounded border border-border px-2 py-1 text-foreground hover:bg-muted"
+                    className="rounded border border-border dark:border-gray-700 px-2 py-1 text-foreground dark:text-gray-100 hover:bg-muted dark:hover:bg-gray-800"
                     onClick={zoomIn}
                     aria-label="Zoom in"
                 >
@@ -404,7 +404,7 @@ export function WorldMap({ data, height = 340 }: WorldMapProps) {
                 </button>
                 <button
                     type="button"
-                    className="rounded border border-border px-2 py-1 text-foreground hover:bg-muted"
+                    className="rounded border border-border dark:border-gray-700 px-2 py-1 text-foreground dark:text-gray-100 hover:bg-muted dark:hover:bg-gray-800"
                     onClick={resetView}
                 >
                     Reset
