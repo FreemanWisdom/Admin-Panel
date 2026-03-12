@@ -1,0 +1,883 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel - Installation Guide</title>
+    <style>
+      :root {
+        --bg: #f4f7fb;
+        --card: #ffffff;
+        --text: #142033;
+        --muted: #4f5f78;
+        --accent: #0a66c2;
+        --border: #dbe3ef;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 100%);
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      .wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px 24px 64px;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 28px;
+        box-shadow: 0 8px 24px rgba(18, 35, 70, 0.08);
+      }
+
+      h1, h2, h3 {
+        margin-top: 0;
+      }
+
+      h1 {
+        margin-bottom: 8px;
+        font-size: 32px;
+        color: #0f2f5e;
+      }
+
+      h2 {
+        margin-bottom: 12px;
+        font-size: 22px;
+        color: #0f2f5e;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      h3 {
+        margin-bottom: 8px;
+        font-size: 16px;
+        color: var(--text);
+      }
+
+      p {
+        margin-top: 0;
+        margin-bottom: 12px;
+      }
+
+      .muted {
+        color: var(--muted);
+        font-size: 15px;
+      }
+
+      .section {
+        margin-top: 28px;
+      }
+
+      .highlight-box {
+        background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fe 100%);
+        border: 1px solid #d0e8fc;
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin: 16px 0;
+      }
+
+      code {
+        background: #f1f6ff;
+        border: 1px solid #d8e6fb;
+        border-radius: 6px;
+        padding: 2px 7px;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 0.93em;
+        color: #0a55c2;
+      }
+
+      pre {
+        margin: 10px 0 0;
+        padding: 14px;
+        overflow: auto;
+        border: 1px solid #d8e6fb;
+        border-radius: 10px;
+        background: #f6faff;
+      }
+
+      pre code {
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: var(--text);
+      }
+
+      ul, ol {
+        margin: 8px 0 0;
+        padding-left: 24px;
+      }
+
+      li {
+        margin: 6px 0;
+      }
+
+      .scripts li {
+        margin: 4px 0;
+      }
+
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+        margin-right: 4px;
+      }
+
+      .badge-core { background: #dbeafe; color: #1e40af; }
+      .badge-ui { background: #fce7f3; color: #9d174d; }
+      .badge-charts { background: #dcfce7; color: #166534; }
+      .badge-utils { background: #fef3c7; color: #92400e; }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 12px;
+        margin: 16px 0;
+      }
+
+      .feature-item {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px 16px;
+      }
+
+      .feature-item strong {
+        display: block;
+        color: #0f2f5e;
+        margin-bottom: 4px;
+      }
+
+      .feature-item p {
+        margin: 0;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .folder-tree {
+        background: #1e293b;
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin: 12px 0;
+        overflow-x: auto;
+      }
+
+      .folder-tree code {
+        background: transparent;
+        border: 0;
+        color: #e2e8f0;
+        font-size: 13px;
+        line-height: 1.8;
+        padding: 0;
+      }
+
+      .folder-tree .folder { color: #fbbf24; }
+      .folder-tree .file { color: #60a5fa; }
+      .folder-tree .ext-tsx { color: #38bdf8; }
+      .folder-tree .ext-ts { color: #4ade80; }
+
+      .note {
+        background: #fffbeb;
+        border-left: 4px solid var(--warning);
+        padding: 12px 16px;
+        margin: 16px 0;
+        border-radius: 0 6px 6px 0;
+      }
+
+      .tip {
+        background: #ecfdf5;
+        border-left: 4px solid var(--success);
+        padding: 12px 16px;
+        margin: 16px 0;
+        border-radius: 0 6px 6px 0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0;
+      }
+
+      th, td {
+        padding: 10px 12px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+      }
+
+      th {
+        background: #f8fafc;
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--muted);
+      }
+
+      td {
+        font-size: 14px;
+      }
+
+      code.path {
+        background: #eef2ff;
+        border: 1px solid #c7d2fe;
+        color: #4338ca;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="card">
+        <h1>Admin Panel Installation Guide</h1>
+        <p class="muted">
+          Complete setup guide for the Next.js Admin Dashboard Template. This is a frontend-only application with mock data support.
+        </p>
+
+        <!-- Project Overview -->
+        <div class="section">
+          <h2>1. Project Overview</h2>
+          <p>
+            Admin Panel is a modern, responsive dashboard template built with <strong>Next.js 16</strong>, 
+            <strong>TypeScript</strong>, and <strong>Tailwind CSS</strong>. It provides a complete admin interface 
+            with multiple dashboard variants, data visualization charts, customer management, order tracking, 
+            and more.
+          </p>
+          
+          <div class="highlight-box">
+            <strong>Quick Stats:</strong>
+            <ul style="margin-top: 8px; margin-bottom: 0;">
+              <li>Latest Next.js 16 with App Router</li>
+              <li>TypeScript for type safety</li>
+              <li>Tailwind CSS for styling</li>
+              <li>React Query for data fetching</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Tech Stack -->
+        <div class="section">
+          <h2>2. Technology Stack</h2>
+          <p>This project uses the following technologies:</p>
+          
+          <h3>Core Framework</h3>
+          <div class="feature-grid">
+            <div class="feature-item">
+              <span class="badge badge-core">Core</span>
+              <strong>Next.js 16.1.6</strong>
+              <p>React framework with App Router, Server Components, and SSR support</p>
+            </div>
+            <div class="feature-item">
+              <span class="badge badge-core">Core</span>
+              <strong>React 19</strong>
+              <p>Latest React with concurrent features and improved hooks</p>
+            </div>
+            <div class="feature-item">
+              <span class="badge badge-core">Core</span>
+              <strong>TypeScript 5</strong>
+              <p>Full type safety across the entire application</p>
+            </div>
+            <div class="feature-item">
+              <span class="badge badge-core">Core</span>
+              <strong>Tailwind CSS 3.4</strong>
+              <p>Utility-first CSS framework with custom design system</p>
+            </div>
+          </div>
+
+          <h3>UI Components & Libraries</h3>
+          <div class="feature-grid">
+            <div class="feature-item">
+              <span class="badge badge-ui">UI</span>
+              <strong>Radix UI</strong>
+              <p>Accessible unstyled components (Dialog, Select, Dropdown, Toast, etc.)</p>
+            </div>
+            <div class="feature-item">
+              <span class="badge badge-ui">UI</span>
+              <strong>Lucide React</strong>
+              <p>Beautiful, consistent icon set with 1000+ icons</p>
+            </div>
+            <div class="feature-item">
+              <span class="badge badge-ui">UI</span>
+              <strong>Framer Motion 12</strong>
+              <p>Smooth animations and transitions throughout the app</p>
+            </div>
+            <div class="feature-item">
+              <span class="badge badge-charts">Charts</span>
+              <strong>Recharts 3</strong>
+              <p>Composable charting library for data visualization</p>
+            </div>
+          </div>
+
+          <h3>Data & Utilities</h3>
+          <div class="feature-grid">
+            <div class="feature-item">
+              <span class="badge badge-utils">Data</span>
+              <strong>TanStack React Query 5</strong>
+              <p>Powerful asynchronous state management for server data</p>
+            </div>
+            <div class="feature-item">
+              <span class="badge badge-utils">Data</span>
+              <strong>TanStack React Table 8</strong>
+              <p>Headless UI for building powerful tables and data grids</p>
+            </div>
+            <div class="feature-item">
+              <span class="badge badge-utils">Forms</span>
+              <strong>React Hook Form 7</strong>
+              <p>Performant form validation with Zod schema resolver</p>
+            </div>
+            <div class="feature-item">
+              <span class="badge badge-utils">Validation</span>
+              <strong>Zod 4</strong>
+              <p>TypeScript-first schema validation library</p>
+            </div>
+          </div>
+
+          <h3>Development Tools</h3>
+          <div class="feature-grid">
+            <div class="feature-item">
+              <span class="badge badge-core">Dev</span>
+              <strong>ESLint 9</strong>
+              <p>Code linting with TypeScript and Prettier integration</p>
+            </div>
+            <div class="feature-item">
+              <span class="badge badge-core">Dev</span>
+              <strong>Prettier 3</strong>
+              <p>Code formatting with automatic Tailwind class sorting</p>
+            </div>
+            <div class="feature-item">
+              <span class="badge badge-core">Dev</span>
+              <strong>Jest 30</strong>
+              <p>Unit testing framework with React Testing Library</p>
+            </div>
+            <div class="feature-item">
+              <span class="badge badge-utils">Maps</span>
+              <strong>D3 Geo + TopoJSON</strong>
+              <p>Interactive world map visualization</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Features -->
+        <div class="section">
+          <h2>3. Features</h2>
+          <p>The Admin Panel includes the following features:</p>
+
+          <h3>Dashboard Pages</h3>
+          <div class="feature-grid">
+            <div class="feature-item">
+              <strong>Dashboard 1</strong>
+              <p>Main dashboard with revenue charts, user analytics, world map, and recent orders</p>
+            </div>
+            <div class="feature-item">
+              <strong>Dashboard 2</strong>
+              <p>Alternative dashboard layout with different visualizations and metrics</p>
+            </div>
+          </div>
+
+          <h3>Core Modules</h3>
+          <div class="feature-grid">
+            <div class="feature-item">
+              <strong>Orders Management</strong>
+              <p>Track and manage customer orders with status filtering and order details</p>
+            </div>
+            <div class="feature-item">
+              <strong>Customers</strong>
+              <p>View and manage customer database with detailed profiles</p>
+            </div>
+            <div class="feature-item">
+              <strong>Maps</strong>
+              <p>Interactive world map showing global distribution of orders and users</p>
+            </div>
+          </div>
+
+          <h3>Settings & Configuration</h3>
+          <div class="feature-grid">
+            <div class="feature-item">
+              <strong>Account Settings</strong>
+              <p>Manage user account preferences and profile information</p>
+            </div>
+            <div class="feature-item">
+              <strong>Authentication Settings</strong>
+              <p>Configure authentication methods and login options</p>
+            </div>
+            <div class="feature-item">
+              <strong>Admin Management</strong>
+              <p>Add, edit, and manage administrator accounts</p>
+            </div>
+            <div class="feature-item">
+              <strong>Security Settings</strong>
+              <p>Configure security options including 2FA and session management</p>
+            </div>
+          </div>
+
+          <h3>Data Visualization</h3>
+          <div class="feature-grid">
+            <div class="feature-item">
+              <strong>Revenue Area Chart</strong>
+              <p>Interactive area chart showing revenue trends over time with range filters</p>
+            </div>
+            <div class="feature-item">
+              <strong>Daily Users Bar Chart</strong>
+              <p>Bar chart displaying daily active users with time range selection</p>
+            </div>
+            <div class="feature-item">
+              <strong>Pie Chart</strong>
+              <p>Data distribution visualization for various metrics</p>
+            </div>
+            <div class="feature-item">
+              <strong>Line Chart</strong>
+              <p>Trend analysis with multiple data series support</p>
+            </div>
+            <div class="feature-item">
+              <strong>World Map</strong>
+              <p>Interactive D3 geo map showing global order distribution by country</p>
+            </div>
+          </div>
+
+          <h3>UI Components</h3>
+          <div class="feature-grid">
+            <div class="feature-item">
+              <strong>Responsive Sidebar</strong>
+              <p>Collapsible navigation with animated expand/collapse and mobile support</p>
+            </div>
+            <div class="feature-item">
+              <strong>Top Navigation</strong>
+              <p>Header with search, notifications, theme toggle, and profile dropdown</p>
+            </div>
+            <div class="feature-item">
+              <strong>Data Tables</strong>
+              <p>Sortable, filterable tables with pagination using TanStack Table</p>
+            </div>
+            <div class="feature-item">
+              <strong>Modal System</strong>
+              <p>Accessible dialog modals with animations</p>
+            </div>
+            <div class="feature-item">
+              <strong>Toast Notifications</strong>
+              <p>Non-blocking notification system with auto-dismiss</p>
+            </div>
+            <div class="feature-item">
+              <strong>Theme Support</strong>
+              <p>Light/dark mode with next-themes and system preference detection</p>
+            </div>
+            <div class="feature-item">
+              <strong>Form Components</strong>
+              <p>Input, Select, Button, Badge, Avatar, Card, and more</p>
+            </div>
+            <div class="feature-item">
+              <strong>Loading States</strong>
+              <p>Skeleton loaders for smooth loading experiences</p>
+            </div>
+          </div>
+
+          <h3>Developer Experience</h3>
+          <div class="feature-grid">
+            <div class="feature-item">
+              <strong>TypeScript Support</strong>
+              <p>Full type definitions for all components, hooks, and utilities</p>
+            </div>
+            <div class="feature-item">
+              <strong>ESLint + Prettier</strong>
+              <p>Code quality tools with automated formatting on save</p>
+            </div>
+            <div class="feature-item">
+              <strong>Jest Testing</strong>
+              <p>Unit tests for components with React Testing Library</p>
+            </div>
+            <div class="feature-item">
+              <strong>Mock API</strong>
+              <p>Built-in mock API in lib/api.ts for development without backend</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Requirements -->
+        <div class="section">
+          <h2>4. Requirements</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Requirement</th>
+                <th>Version</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>Node.js</code></td>
+                <td>18.x LTS or later</td>
+                <td>Latest LTS (20.x) recommended</td>
+              </tr>
+              <tr>
+                <td><code>npm</code></td>
+                <td>9.x or later</td>
+                <td>Comes with Node.js</td>
+              </tr>
+              <tr>
+                <td><code>Git</code></td>
+                <td>2.x or later</td>
+                <td>Optional but recommended</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="muted">To check your Node.js version, run: <code>node --version</code></p>
+        </div>
+
+        <!-- Installation Steps -->
+        <div class="section">
+          <h2>5. Installation Steps</h2>
+          
+          <h3>Step 1: Navigate to Project Directory</h3>
+          <pre><code>cd PANEL</code></pre>
+
+          <h3>Step 2: Install Dependencies</h3>
+          <p>Install all required npm packages:</p>
+          <pre><code>npm install</code></pre>
+          <p class="muted">This will install all dependencies defined in package.json.</p>
+
+          <h3>Step 3: Environment Configuration</h3>
+          <p>Create a local environment file by copying the example:</p>
+          
+          <p><strong>Windows PowerShell:</strong></p>
+          <pre><code>Copy-Item .env.example .env.local</code></pre>
+          
+          <p><strong>macOS/Linux/Git Bash:</strong></p>
+          <pre><code>cp .env.example .env.local</code></pre>
+
+          <h3>Step 4: Configure Environment Variables</h3>
+          <p>Edit <code>.env.local</code> with your preferred settings:</p>
+          <pre><code># Application Name
+NEXT_PUBLIC_APP_NAME=Admin Panel
+
+# API Base URL (for your backend)
+NEXT_PUBLIC_API_BASE_URL=http://localhost:4000/api
+
+# Optional: Enable debug mode
+NEXT_PUBLIC_DEBUG=false</code></pre>
+
+          <div class="tip">
+            <strong>Tip:</strong> The application includes mock API calls in <code>lib/api.ts</code>. 
+            For development, you can use the mock data without setting up a backend server.
+          </div>
+
+          <h3>Step 5: Run Development Server</h3>
+          <p>Start the development server:</p>
+          <pre><code>npm run dev</code></pre>
+          <p>Open your browser and navigate to:</p>
+          <pre><code>http://localhost:3000</code></pre>
+        </div>
+
+        <!-- Available Scripts -->
+        <div class="section">
+          <h2>6. Available NPM Scripts</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Command</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>npm run dev</code></td>
+                <td>Start development server with hot reload</td>
+              </tr>
+              <tr>
+                <td><code>npm run build</code></td>
+                <td>Create production build</td>
+              </tr>
+              <tr>
+                <td><code>npm run start</code></td>
+                <td>Start production server (after build)</td>
+              </tr>
+              <tr>
+                <td><code>npm run lint</code></td>
+                <td>Run ESLint checks</td>
+              </tr>
+              <tr>
+                <td><code>npm run test</code></td>
+                <td>Run tests once</td>
+              </tr>
+              <tr>
+                <td><code>npm run test:watch</code></td>
+                <td>Run tests in watch mode</td>
+              </tr>
+              <tr>
+                <td><code>npm run format</code></td>
+                <td>Check code formatting</td>
+              </tr>
+              <tr>
+                <td><code>npm run format:write</code></td>
+                <td>Auto-format code with Prettier</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Production Deployment -->
+        <div class="section">
+          <h2>7. Production Deployment</h2>
+          
+          <h3>Building for Production</h3>
+          <pre><code>npm run build</code></pre>
+          <p class="muted">This creates an optimized production build in the <code>.next</code> folder.</p>
+
+          <h3>Starting Production Server</h3>
+          <pre><code>npm run start</code></pre>
+          <p>The production server runs on <code>http://localhost:3000</code> by default.</p>
+
+          <h3>Environment Variables for Production</h3>
+          <p>Set these environment variables on your production server:</p>
+          <pre><code>NEXT_PUBLIC_APP_NAME=Admin Panel
+NEXT_PUBLIC_API_BASE_URL=https://your-api-domain.com/api
+NEXT_PUBLIC_DEBUG=false</code></pre>
+
+          <div class="note">
+            <strong>Note:</strong> Always set <code>NEXT_PUBLIC_DEBUG=false</code> in production to disable debug features.
+          </div>
+        </div>
+
+        <!-- Project Structure -->
+        <div class="section">
+          <h2>8. Project Structure</h2>
+          <p>Understanding the folder structure:</p>
+          
+          <div class="folder-tree">
+            <code>
+              PANEL/<br/>
+              ├── <span class="folder">src/</span><br/>
+              │   ├── <span class="folder">app/</span>                  # Next.js App Router pages<br/>
+              │   │   ├── <span class="folder">(auth)/</span>           # Authentication pages<br/>
+              │   │   ├── <span class="folder">dashboard/</span>       # Dashboard pages<br/>
+              │   │   │   ├── customers/       # Customers page<br/>
+              │   │   │   ├── dashboard1/      # Dashboard variant 1<br/>
+              │   │   │   ├── dashboard2/      # Dashboard variant 2<br/>
+              │   │   │   ├── maps/            # Maps page<br/>
+              │   │   │   ├── orders/          # Orders page<br/>
+              │   │   │   ├── profile/        # Profile page<br/>
+              │   │   │   └── <span class="folder">settings/</span>  # Settings pages<br/>
+              │   │   ├── lock/                # Lock screen<br/>
+              │   │   ├── layout.tsx           # Root layout<br/>
+              │   │   └── page.tsx             # Home/redirect page<br/>
+              │   ├── <span class="folder">components/</span>         # React components<br/>
+              │   │   ├── <span class="folder">charts/</span>         # Chart components<br/>
+              │   │   ├── <span class="folder">layout/</span>         # Layout components<br/>
+              │   │   ├── <span class="folder">modals/</span>         # Modal components<br/>
+              │   │   ├── <span class="folder">navigation/</span>    # Nav components<br/>
+              │   │   ├── <span class="folder">profile/</span>      # Profile components<br/>
+              │   │   ├── <span class="folder">tables/</span>       # Table components<br/>
+              │   │   └── <span class="folder">ui/</span>            # Base UI components<br/>
+              │   ├── <span class="folder">hooks/</span>              # Custom React hooks<br/>
+              │   ├── <span class="folder">lib/</span>               # Utilities and API<br/>
+              │   │   ├── api.ts               # API functions & mock data<br/>
+              │   │   └── utils.ts             # Helper functions<br/>
+              │   └── <span class="folder">types/</span>             # TypeScript definitions<br/>
+              ├── <span class="folder">public/</span>                # Static assets<br/>
+              ├── <span class="folder">__tests__/</span>             # Jest test files<br/>
+              └── package.json                 # Dependencies & scripts<br/>
+            </code>
+          </div>
+        </div>
+
+        <!-- Authentication -->
+        <div class="section">
+          <h2>9. Authentication</h2>
+          <p>
+            This template includes a mocked authentication system for demonstration purposes. 
+            The app checks for a token stored in <code>localStorage</code>.
+          </p>
+          
+          <div class="highlight-box">
+            <strong>How Authentication Works:</strong>
+            <ul style="margin-top: 8px; margin-bottom: 0;">
+              <li>On first load, if no token exists, user is redirected to <code>/lock</code></li>
+              <li>Login page saves a mock token to <code>localStorage.admin_token</code></li>
+              <li>After login, user is redirected to <code>/dashboard</code></li>
+              <li>Token presence is checked via <code>AuthGuard</code> component</li>
+            </ul>
+          </div>
+
+          <h3>To Implement Real Authentication:</h3>
+          <ol>
+            <li>Update <code>src/lib/api.ts</code> with real API calls</li>
+            <li>Modify the login function in <code>src/app/lock/page.tsx</code></li>
+            <li>Update <code>src/components/layout/AuthGuard.tsx</code> to validate real tokens</li>
+            <li>Add JWT/session validation logic</li>
+          </ol>
+        </div>
+
+        <!-- API Configuration -->
+        <div class="section">
+          <h2>10. API Configuration</h2>
+          <p>
+            The application uses React Query for data fetching. All API functions are defined in 
+            <code>src/lib/api.ts</code>.
+          </p>
+
+          <h3>Mock Data</h3>
+          <p>
+            By default, the app uses mock data functions. These return simulated data for development 
+            without a backend.
+          </p>
+
+          <h3>Connecting to a Real API</h3>
+          <ol>
+            <li>Update <code>NEXT_PUBLIC_API_BASE_URL</code> in your environment file</li>
+            <li>Modify the API functions in <code>src/lib/api.ts</code></li>
+            <li>Replace mock functions with real fetch/axios calls</li>
+          </ol>
+
+          <pre><code>// Example: Replace mock function
+// Before (mock):
+async function getDashboardStats() {
+  return mockDashboardStats;
+}
+
+// After (real API):
+async function getDashboardStats() {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/stats`);
+  return response.json();
+}</code></pre>
+        </div>
+
+        <!-- Customization -->
+        <div class="section">
+          <h2>11. Customization</h2>
+          
+          <h3>Theme Colors</h3>
+          <p>Modify colors in <code>tailwind.config.ts</code>:</p>
+          <pre><code>// tailwind.config.ts
+export default {
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          DEFAULT: '#0a66c2',  // Change primary color
+          foreground: '#ffffff',
+        },
+        // Add more custom colors...
+      },
+    },
+  },
+}</code></pre>
+
+          <h3>Adding New Pages</h3>
+          <p>Create new pages under <code>src/app/dashboard/</code>:</p>
+          <pre><code>// src/app/dashboard/new-page/page.tsx
+export default function NewPage() {
+  return (
+    <div>
+      <h1>My New Page</h1>
+    </div>
+  );
+}</code></pre>
+
+          <h3>Adding New Components</h3>
+          <p>Place components in <code>src/components/</code> and import as needed.</p>
+        </div>
+
+        <!-- Troubleshooting -->
+        <div class="section">
+          <h2>12. Troubleshooting</h2>
+          
+          <h3>Common Issues</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Issue</th>
+                <th>Solution</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Port 3000 in use</td>
+                <td>Run <code>npm run dev -- -p 3001</code> or kill the process</td>
+              </tr>
+              <tr>
+                <td>TypeScript errors</td>
+                <td>Run <code>npm install</code> to ensure all types are installed</td>
+              </tr>
+              <tr>
+                <td>Build fails</td>
+                <td>Check for lint errors with <code>npm run lint</code></td>
+              </tr>
+              <tr>
+                <td>Styles not loading</td>
+                <td>Ensure <code>globals.css</code> imports Tailwind directives</td>
+              </tr>
+              <tr>
+                <td>Charts not rendering</td>
+                <td>Check browser console for D3/Recharts errors</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="note">
+            <strong>Still having issues?</strong>
+            <ul style="margin-top: 8px; margin-bottom: 0;">
+              <li>Clear node_modules and reinstall: <code>rm -rf node_modules && npm install</code></li>
+              <li>Clear Next.js cache: <code>rm -rf .next</code></li>
+              <li>Check Node.js version compatibility</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Support -->
+        <div class="section">
+          <h2>13. Support & Resources</h2>
+          <p>For more information, check these resources:</p>
+          <ul>
+            <li><a href="https://nextjs.org/docs" target="_blank">Next.js Documentation</a></li>
+            <li><a href="https://tailwindcss.com/docs" target="_blank">Tailwind CSS Documentation</a></li>
+            <li><a href="https://tanstack.com/query/latest" target="_blank">TanStack Query Docs</a></li>
+            <li><a href="https://react.dev/" target="_blank">React Documentation</a></li>
+            <li><a href="https://radix-ui.com/" target="_blank">Radix UI Components</a></li>
+            <li><a href="https://recharts.org/" target="_blank">Recharts Documentation</a></li>
+          </ul>
+        </div>
+
+        <!-- License & Note -->
+        <div class="section">
+          <h2>14. Important Notes</h2>
+          
+          <div class="highlight-box">
+            <strong>Frontend Only:</strong>
+            <p style="margin-top: 8px; margin-bottom: 0;">
+              This package does not include a backend or database. The mock API in 
+              <code>src/lib/api.ts</code> provides sample data for development. 
+              Connect <code>NEXT_PUBLIC_API_BASE_URL</code> to your own API for production use.
+            </p>
+          </div>
+
+          <p class="muted" style="margin-top: 20px;">
+            Thank you for using Admin Panel! If you have questions or need support, 
+            please refer to the documentation or contact support.
+          </p>
+        </div>
+
+      </section>
+    </main>
+  </body>
+</html>
+
